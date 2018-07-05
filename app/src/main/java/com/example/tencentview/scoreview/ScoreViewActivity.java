@@ -24,12 +24,12 @@ public class ScoreViewActivity extends Activity {
         mScoreView.setListener(new ScoreView.IAnimListener() {
             @Override
             public void onScrollStart() {
-                Log.d("xiao", "onScrollStart");
+                Log.d("xiao1", "onScrollStart");
             }
 
             @Override
             public void onScrollEnd() {
-                Log.d("xiao", "onScrollEnd");
+                Log.d("xiao1", "onScrollEnd");
             }
         });
     }
@@ -43,6 +43,6 @@ public class ScoreViewActivity extends Activity {
     }
 
     public void onFinishNoAnim(View view){
-        mScoreView.setScore(48, false);
+        mScoreView.setScore(9, false);
     }
 }

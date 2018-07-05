@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -26,8 +27,8 @@ public class ScoreView extends View {
     //滚动方向
     private int scrollDirection = SCROLL_DOWN;
 
-    private int mWidth;//两个字符的宽度
-    private int mHeight;
+    private int mTextWidth;//两个字符的宽度
+    private int mTextHeight;
     private int mInitY;//数字最终绘制的Y坐标
 
     private Paint mTextPaint;//文字Paint
@@ -96,14 +97,16 @@ public class ScoreView extends View {
         mTextPaint.setAntiAlias(true);//设置mPaint抗锯齿
         mTextPaint.setShadowLayer(20, 10, 10, SHADOW_COLOR);
 
-        mWidth = getStringWidth(mTextPaint, "11");//两个字符的宽度
-        mHeight = getStringHeight(mTextPaint) + dp2px(mContext, 40);//一个字符高度+40dp
+        mTextWidth = getStringWidth(mTextPaint, "11");//两个字符的宽度
+        mTextHeight = getStringHeight(mTextPaint);
+
+        //mTextHeight = getStringHeight(mTextPaint) + dp2px(mContext, 40);//一个字符高度+40dp
 
         mMuskPaint = new Paint();
-        mTopShader = new LinearGradient(mWidth / 2, 0, mWidth / 2, mHeight / 8, MASK_COLOR, 0x0, Shader.TileMode.CLAMP);
-        mBottomShader = new LinearGradient(mWidth / 2, mHeight * 7 / 8, mWidth / 2, mHeight, 0x0, MASK_COLOR, Shader.TileMode.CLAMP);
-
-        mInitY = mHeight - dp2px(mContext, 20);//数字初始绘制的Y坐标
+//        mTopShader = new LinearGradient(mTextWidth / 2, 0, mTextWidth / 2, mTextHeight / 8, MASK_COLOR, 0x0, Shader.TileMode.CLAMP);
+//        mBottomShader = new LinearGradient(mTextWidth / 2, mTextHeight * 7 / 8, mTextWidth / 2, mTextHeight, 0x0, MASK_COLOR, Shader.TileMode.CLAMP);
+//
+//        mInitY = mTextHeight - dp2px(mContext, 20);//数字初始绘制的Y坐标
 
         SCROLL_DISTANCE = dp2px(mContext, 6);
 
@@ -123,19 +126,23 @@ public class ScoreView extends View {
         mBitNumber.start();
 
         isAnim = true;
-        invalidate();
         if (listener != null) {
             listener.onScrollStart();
         }
+        invalidate();
     }
 
     /**
      * 设置结果
      *
      * @param score
-     * @param hasAnim true：动画过程滚动到结果数字；false：无动画过程，直接到结果数字
+     * @param hasOverAnim true：动画过程滚动到结果数字；false：无动画过程，直接到结果数字
      */
-    public void setScore(int score, boolean hasAnim) {
+    public void setScore(int score, boolean hasOverAnim) {
+        if(!isAnim){
+            return;
+        }
+
         if (score < 0) {
             score = 0;
         }
@@ -148,11 +155,10 @@ public class ScoreView extends View {
         int tenNumber = Integer.parseInt(targetScore.substring(0, 1));//十位数字
         int bitNumber = Integer.parseInt(targetScore.substring(1, 2));//个位数字
 
-        mTenNumber.setScore(tenNumber, hasAnim);
-        mBitNumber.setScore(bitNumber, hasAnim);
+        mTenNumber.setScore(tenNumber, hasOverAnim);
+        mBitNumber.setScore(bitNumber, hasOverAnim);
 
-        if (hasAnim) {
-            isAnim = false;
+        if (hasOverAnim) {
             invalidate();
         }
     }
@@ -160,7 +166,32 @@ public class ScoreView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(mWidth, mHeight + getPaddingBottom());
+        int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        switch (heightSpecMode) {
+            case MeasureSpec.AT_MOST:
+                setMeasuredDimension(mTextWidth, mTextHeight);
+                break;
+            case MeasureSpec.EXACTLY:
+                int size = heightSpecSize > mTextHeight ? heightSpecSize : mTextHeight;
+                setMeasuredDimension(mTextWidth, size);
+                break;
+        }
+
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        int width = getWidth();
+        int height = getHeight();
+        //计算顶部和底部遮罩层位置
+        mTopShader = new LinearGradient(width / 2, 0, width / 2, height / 8, MASK_COLOR, 0x0, Shader.TileMode.CLAMP);
+        mBottomShader = new LinearGradient(width / 2, height * 7 / 8, width / 2, height, 0x0, MASK_COLOR, Shader.TileMode.CLAMP);
+        //计算保证初始绘制字符在中间
+        mInitY = (height - mTextHeight) / 2 + mTextHeight;//数字初始绘制的Y坐标
     }
 
     @Override
@@ -171,16 +202,15 @@ public class ScoreView extends View {
         canvas.drawColor(0xffff0000);
         //绘制滚动数字
         mTenNumber.drawNumber(canvas, 0, SCROLL_DISTANCE * 2);
-        mBitNumber.drawNumber(canvas, mWidth / 2, SCROLL_DISTANCE * 3);
+        mBitNumber.drawNumber(canvas, mTextWidth / 2, SCROLL_DISTANCE * 3);
         //绘制顶部遮罩层
         mMuskPaint.setShader(mTopShader);
-        canvas.drawRect(0, 0, mWidth, mHeight / 8, mMuskPaint);
+        canvas.drawRect(0, 0, getWidth(), getHeight() / 8, mMuskPaint);
         //绘制底部遮罩层
         mMuskPaint.setShader(mBottomShader);
-        canvas.drawRect(0, mHeight * 7 / 8, mWidth, mHeight, mMuskPaint);
+        canvas.drawRect(0, getHeight() * 7 / 8, getWidth(), getHeight(), mMuskPaint);
 
         if (mTenNumber.isAnim || mBitNumber.isAnim) {
-            isAnim = true;
             invalidate();
         } else {
             //这个地方需要添加isAnim的判断，否则View刚显示时会回调onScrollEnd方法
@@ -204,9 +234,6 @@ public class ScoreView extends View {
         void onScrollEnd();
     }
 
-    /**
-     * 封装个位和十位数字
-     */
     private class Number {
         int currentNum = 9;
         int currentNextNum;
@@ -217,7 +244,6 @@ public class ScoreView extends View {
         Number() {
             currentNum = 0;
             targetNum = 0;
-            currentY = mInitY;
         }
 
         /**
@@ -244,8 +270,8 @@ public class ScoreView extends View {
             if (isAnim) {
                 if (scrollDirection == SCROLL_DOWN) {//向下滚动，数字是递减的
                     currentY = currentY + deltaY;
-                    if (currentY > (mInitY + mHeight)) {//数字是否已经全部滚动到视图Bottom外面（注：currentY的初始值为mSourceY）
-                        currentY = currentY - mHeight;
+                    if (currentY > (mInitY + mTextHeight)) {//数字是否已经全部滚动到视图Bottom外面（注：currentY的初始值为mSourceY）
+                        currentY = currentY - mTextHeight;
                         currentNum = currentNum - 1;
                         if (currentNum < 0) {
                             currentNum = 9;
@@ -254,7 +280,7 @@ public class ScoreView extends View {
                 } else {//向上滚动，数字是递增的
                     currentY = currentY - deltaY;
                     if (currentY < 0) {//数字是否已经全部滚动到视图Top外面（注：currentY的初始值为mSourceY）
-                        currentY = currentY + mHeight;
+                        currentY = currentY + mTextHeight;
                         currentNum = currentNum + 1;
                         if (currentNum > 9) {
                             currentNum = 0;
@@ -294,9 +320,9 @@ public class ScoreView extends View {
                             currentNextNum = 0;
                         }
                     }
-                    canvas.drawText(String.valueOf(currentNextNum), positionX, (scrollDirection == SCROLL_DOWN) ? currentY - mHeight : currentY + mHeight, mTextPaint);
+                    canvas.drawText(String.valueOf(currentNextNum), positionX, (scrollDirection == SCROLL_DOWN) ? currentY - mTextHeight : currentY + mTextHeight, mTextPaint);
                 }
-            }else {
+            } else {
                 currentY = mInitY;
                 canvas.drawText(String.valueOf(currentNum), positionX, currentY, mTextPaint);
             }
