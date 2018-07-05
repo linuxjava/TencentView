@@ -25,7 +25,7 @@ public class ScoreView extends View {
     //数字滚动一次的距离
     private int SCROLL_DISTANCE;
     //滚动方向
-    private int scrollDirection = SCROLL_DOWN;
+    private int scrollDirection = SCROLL_UP;
 
     private int mTextWidth;//两个字符的宽度
     private int mTextHeight;
@@ -100,13 +100,7 @@ public class ScoreView extends View {
         mTextWidth = getStringWidth(mTextPaint, "11");//两个字符的宽度
         mTextHeight = getStringHeight(mTextPaint);
 
-        //mTextHeight = getStringHeight(mTextPaint) + dp2px(mContext, 40);//一个字符高度+40dp
-
         mMuskPaint = new Paint();
-//        mTopShader = new LinearGradient(mTextWidth / 2, 0, mTextWidth / 2, mTextHeight / 8, MASK_COLOR, 0x0, Shader.TileMode.CLAMP);
-//        mBottomShader = new LinearGradient(mTextWidth / 2, mTextHeight * 7 / 8, mTextWidth / 2, mTextHeight, 0x0, MASK_COLOR, Shader.TileMode.CLAMP);
-//
-//        mInitY = mTextHeight - dp2px(mContext, 20);//数字初始绘制的Y坐标
 
         SCROLL_DISTANCE = dp2px(mContext, 6);
 
@@ -270,7 +264,7 @@ public class ScoreView extends View {
             if (isAnim) {
                 if (scrollDirection == SCROLL_DOWN) {//向下滚动，数字是递减的
                     currentY = currentY + deltaY;
-                    if (currentY > (mInitY + mTextHeight)) {//数字是否已经全部滚动到视图Bottom外面（注：currentY的初始值为mSourceY）
+                    if (currentY > (mInitY + mTextHeight)) {//数字向下移动超过一个字符高度
                         currentY = currentY - mTextHeight;
                         currentNum = currentNum - 1;
                         if (currentNum < 0) {
@@ -279,7 +273,7 @@ public class ScoreView extends View {
                     }
                 } else {//向上滚动，数字是递增的
                     currentY = currentY - deltaY;
-                    if (currentY < 0) {//数字是否已经全部滚动到视图Top外面（注：currentY的初始值为mSourceY）
+                    if (currentY < (mInitY - mTextHeight)) {//数字向上移动超过一个字符高度
                         currentY = currentY + mTextHeight;
                         currentNum = currentNum + 1;
                         if (currentNum > 9) {
@@ -297,7 +291,7 @@ public class ScoreView extends View {
                      * Math.abs(currentY - mInitY) <= deltaY)表示一个字符首次开始绘制
                      * 滚动结束条件为：当前绘制的字符为目标字符并且该字母为首次绘制
                      * 为什么需要加入“字符首次绘制”这个条件呢？
-                     * 当currentNum == targetNum，表示当前绘制的是目标字符，但是这个字符有可能已经滚动到离mSourceY初始位置很远，如果此时
+                     * 当currentNum == targetNum，表示当前绘制的是目标字符，但是这个字符有可能已经滚动到离mInitY初始位置很远，如果此时
                      * 没有Math.abs(currentY - mInitY) <= deltaY)的判断，那么现实目标字符的动画将会有一个突兀的过程，通过
                      * Math.abs(currentY - mInitY) <= deltaY)控制，带下一次“开始绘制目标字符并且该字母为首次绘制”时，因为currentY
                      * 距离mSourceY非常小，对用户来说没有感觉。
