@@ -13,4 +13,11 @@
         android:text="ScoreView"
         android:textAllCaps="false"
         android:onClick="onScoreView"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RadarView"
+        android:textAllCaps="false"
+        android:onClick="onRadarView"/>
 </LinearLayout>

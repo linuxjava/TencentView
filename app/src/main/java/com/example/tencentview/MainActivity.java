@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.example.tencentview.radarview.RadarViewActivity;
 import com.example.tencentview.scoreview.ScoreViewActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -17,5 +18,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void onScoreView(View view){
         startActivity(new Intent(this, ScoreViewActivity.class));
+    }
+
+    public void onRadarView(View view){
+        startActivity(new Intent(this, RadarViewActivity.class));
     }
 }
