@@ -28,8 +28,8 @@ public class RadarViewActivity extends Activity {
             }
 
             @Override
-            public void onEnd() {
-                Log.d("xiao1", "onEnd");
+            public void onFinish() {
+                Log.d("xiao1", "onFinish");
             }
         });
     }

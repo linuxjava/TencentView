@@ -21,6 +21,9 @@
 
         <activity android:name=".radarview.RadarViewActivity"
             android:screenOrientation="portrait"/>
+
+        <activity android:name=".popstarview.PopStarActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

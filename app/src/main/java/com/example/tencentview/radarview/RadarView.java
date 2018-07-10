@@ -126,7 +126,7 @@ public class RadarView extends View {
                         mHandler.sendMessageDelayed(message, FRAME_TIME);
                     } else if (mState == STATE_STOP) {
                         if (listener != null) {
-                            listener.onEnd();
+                            listener.onFinish();
                         }
                     }
                     break;
@@ -149,7 +149,7 @@ public class RadarView extends View {
                     } else {
                         mState = STATE_STOP;
                         if (listener != null) {
-                            listener.onEnd();
+                            listener.onFinish();
                         }
                     }
                     break;
@@ -396,7 +396,7 @@ public class RadarView extends View {
     public interface IAnimListener {
         void onStart();
 
-        void onEnd();
+        void onFinish();
     }
 
     class Hexagon {
