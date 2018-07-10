@@ -24,6 +24,9 @@
 
         <activity android:name=".popstarview.PopStarActivity"
             android:screenOrientation="portrait"/>
+
+        <activity android:name=".hexagonloading.HexagonLoadingActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

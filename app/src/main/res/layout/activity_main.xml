@@ -27,4 +27,11 @@
         android:text="PopStarView"
         android:textAllCaps="false"
         android:onClick="onPopStarView"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="HexagonLoadingView"
+        android:textAllCaps="false"
+        android:onClick="onHexagonLoadingView"/>
 </LinearLayout>
