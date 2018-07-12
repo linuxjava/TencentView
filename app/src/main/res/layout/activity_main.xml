@@ -34,4 +34,39 @@
         android:text="HexagonLoadingView"
         android:textAllCaps="false"
         android:onClick="onHexagonLoadingView"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WaveView"
+        android:textAllCaps="false"
+        android:onClick="onWaveView"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SpotLight"
+        android:textAllCaps="false"
+        android:onClick="onSpotLight"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SweepView"
+        android:textAllCaps="false"
+        android:onClick="onSweepView"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="PanelView"
+        android:textAllCaps="false"
+        android:onClick="onPanelView"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WifiGrid"
+        android:textAllCaps="false"
+        android:onClick="onWifiGrid"/>
 </LinearLayout>

@@ -14,6 +14,7 @@ import com.example.tencentview.R;
 
 public class ScoreViewActivity extends Activity {
     private ScoreView mScoreView;
+    private ScoreView1 mScoreView1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -21,6 +22,7 @@ public class ScoreViewActivity extends Activity {
         setContentView(R.layout.activity_score_view);
 
         mScoreView = findViewById(R.id.scoreview);
+        mScoreView1 = findViewById(R.id.scoreview1);
         mScoreView.setListener(new ScoreView.IAnimListener() {
             @Override
             public void onScrollStart() {
@@ -44,5 +46,17 @@ public class ScoreViewActivity extends Activity {
 
     public void onFinishNoAnim(View view){
         mScoreView.setScore(9, false);
+    }
+
+    public void onStart1(View view){
+        mScoreView1.start();
+    }
+
+    public void onFinishWithAnim1(View view){
+        mScoreView1.setScore(100, true);
+    }
+
+    public void onFinishNoAnim1(View view){
+        mScoreView1.setScore(100, false);
     }
 }

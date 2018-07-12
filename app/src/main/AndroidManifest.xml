@@ -16,17 +16,41 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".scoreview.ScoreViewActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".scoreview.ScoreViewActivity"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".radarview.RadarViewActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".radarview.RadarViewActivity"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".popstarview.PopStarActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".popstarview.PopStarActivity"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".hexagonloading.HexagonLoadingActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".hexagonloading.HexagonLoadingActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".waveview.WaveActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".spotlight.SpotlightActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".sweepview.SweepViewActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".panelview.PanelViewActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".wifigrid.WifiGridActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
