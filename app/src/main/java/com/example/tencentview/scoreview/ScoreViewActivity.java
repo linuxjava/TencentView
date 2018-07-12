@@ -14,7 +14,7 @@ import com.example.tencentview.R;
 
 public class ScoreViewActivity extends Activity {
     private ScoreView mScoreView;
-    private ScoreView1 mScoreView1;
+    private ScoreViewFull mScoreViewFull;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -22,7 +22,7 @@ public class ScoreViewActivity extends Activity {
         setContentView(R.layout.activity_score_view);
 
         mScoreView = findViewById(R.id.scoreview);
-        mScoreView1 = findViewById(R.id.scoreview1);
+        mScoreViewFull = findViewById(R.id.scoreview1);
         mScoreView.setListener(new ScoreView.IAnimListener() {
             @Override
             public void onScrollStart() {
@@ -32,6 +32,18 @@ public class ScoreViewActivity extends Activity {
             @Override
             public void onScrollEnd() {
                 Log.d("xiao1", "onScrollEnd");
+            }
+        });
+
+        mScoreViewFull.setListener(new ScoreViewFull.IAnimListener() {
+            @Override
+            public void onScrollStart() {
+                Log.d("xiao1", "ScoreViewFull_onScrollStart");
+            }
+
+            @Override
+            public void onScrollEnd() {
+                Log.d("xiao1", "ScoreViewFull_onScrollEnd");
             }
         });
     }
@@ -49,14 +61,18 @@ public class ScoreViewActivity extends Activity {
     }
 
     public void onStart1(View view){
-        mScoreView1.start();
+        mScoreViewFull.start();
+    }
+
+    public void onReset(View view){
+        mScoreViewFull.reset();
     }
 
     public void onFinishWithAnim1(View view){
-        mScoreView1.setScore(100, true);
+        mScoreViewFull.setScore(99, true);
     }
 
     public void onFinishNoAnim1(View view){
-        mScoreView1.setScore(100, false);
+        mScoreViewFull.setScore(56, false);
     }
 }

@@ -47,7 +47,7 @@
         </LinearLayout>
 
 
-        <com.example.tencentview.scoreview.ScoreView1
+        <com.example.tencentview.scoreview.ScoreViewFull
             android:id="@+id/scoreview1"
             android:layout_width="wrap_content"
             android:layout_height="150dp"
@@ -68,6 +68,13 @@
                 android:layout_weight="1.0"
                 android:onClick="onStart1"
                 android:text="开始滚动" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:onClick="onReset"
+                android:text="复位" />
 
             <Button
                 android:layout_width="match_parent"

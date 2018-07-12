@@ -9,12 +9,11 @@ import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 
 import java.util.Locale;
 
-public class ScoreView1 extends View {
+public class ScoreViewFull extends View {
     public static final int SCROLL_DOWN = 1;//数字向下滚动
     public static final int SCROLL_UP = 2;//数字向上滚动
     private static final int SHADOW_COLOR = 0x55000000;//阴影颜色
@@ -43,15 +42,15 @@ public class ScoreView1 extends View {
     private Number mBitNumber;//个位
     private IAnimListener listener;//动画监听
 
-    public ScoreView1(Context context) {
+    public ScoreViewFull(Context context) {
         this(context, null);
     }
 
-    public ScoreView1(Context context, @Nullable AttributeSet attrs) {
+    public ScoreViewFull(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ScoreView1(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public ScoreViewFull(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         init(context, attrs);
@@ -128,13 +127,27 @@ public class ScoreView1 extends View {
         invalidate();
     }
 
+    public void reset(){
+        if (isAnim) {
+            return;
+        }
+
+        if(mHundredNumber != null){
+            mHundredNumber.reset();
+            mTenNumber.reset();
+            mBitNumber.reset();
+        }
+
+        postInvalidate();
+    }
+
     /**
      * 设置结果
      *
      * @param score
-     * @param hasOverAnim true：动画过程滚动到结果数字；false：无动画过程，直接到结果数字
+     * @param hasFinishAnim true：动画过程滚动到结果数字；false：无动画过程，直接到结果数字
      */
-    public void setScore(int score, boolean hasOverAnim) {
+    public void setScore(int score, boolean hasFinishAnim) {
         if (!isAnim) {
             return;
         }
@@ -152,11 +165,11 @@ public class ScoreView1 extends View {
         int tenNumber = Integer.parseInt(targetScore.substring(1, 2));//十位数字
         int bitNumber = Integer.parseInt(targetScore.substring(2, 3));//个位数字
 
-        mHundredNumber.setScore(hundredNumber);
-        mTenNumber.setScore(tenNumber, hasOverAnim);
-        mBitNumber.setScore(bitNumber, hasOverAnim);
+        mHundredNumber.setScore(hundredNumber, hasFinishAnim);
+        mTenNumber.setScore(tenNumber, hasFinishAnim);
+        mBitNumber.setScore(bitNumber, hasFinishAnim);
 
-        if (hasOverAnim) {
+        if (hasFinishAnim) {
             invalidate();
         }
     }
@@ -199,28 +212,33 @@ public class ScoreView1 extends View {
         //绘制背景，测试使用
         canvas.drawColor(0xffff0000);
 
-        int sc = canvas.saveLayer(0, 0, getWidth(), getHeight(), null, Canvas.ALL_SAVE_FLAG);
+        canvas.save();
 
         canvas.translate(mHundredNumber.translationX, 0);
-        if (mHundredNumber.isAnim()) {
-            //百位的数值在进行动画时
-            if (mHundredNumber.targetNum == 0) {
-                mHundredNumber.drawNumberStartAnim(canvas, SCROLL_DISTANCE);
-                mTenNumber.drawFixNumber(canvas, mTextWidth / 3, 0);//y保持不动
-                mBitNumber.drawFixNumber(canvas, mTextWidth * 2 / 3, 0);//y保持不动
-            } else if (mHundredNumber.targetNum == 1) {
-                mTenNumber.drawNumber(canvas, mTextWidth / 3, SCROLL_DISTANCE * 2);
-                mBitNumber.drawNumber(canvas, mTextWidth * 2 / 3, SCROLL_DISTANCE * 3);
-                if (!mTenNumber.isAnim && !mBitNumber.isAnim) {
-                    mHundredNumber.drawNumberFinishAnim(canvas, SCROLL_DISTANCE);
-                }
-            }
-        } else {
+        if(mHundredNumber.status == mHundredNumber.STATUS_NONE){
+            //View开始显示时执行逻辑
             mHundredNumber.drawNumber(canvas);
             mTenNumber.drawNumber(canvas, mTextWidth / 3, SCROLL_DISTANCE * 2);
             mBitNumber.drawNumber(canvas, mTextWidth * 2 / 3, SCROLL_DISTANCE * 3);
+        }else if(mHundredNumber.status == mHundredNumber.STATUS_DISAPPEAR_ANIM){
+            //百位数字消失过程中整个动画所要执行的逻辑
+            mHundredNumber.drawNumberDisappearAnim(canvas, SCROLL_DISTANCE);
+            mTenNumber.drawFixNumber(canvas, mTextWidth / 3, 0);
+            mBitNumber.drawFixNumber(canvas, mTextWidth * 2 / 3, 0);
+        }else if(mHundredNumber.status == mHundredNumber.STATUS_DISPALY_ANIM){
+            //百位数字显示过程中整个动画所要执行的逻辑
+            mTenNumber.drawNumber(canvas, mTextWidth / 3, SCROLL_DISTANCE * 2);
+            mBitNumber.drawNumber(canvas, mTextWidth * 2 / 3, SCROLL_DISTANCE * 3);
+            if (!mTenNumber.isAnim && !mBitNumber.isAnim) {
+                mHundredNumber.drawNumberDisplayAnim(canvas, SCROLL_DISTANCE);
+            }
+        }else {
+            //滚动过程中执行逻辑
+            mTenNumber.drawNumber(canvas, mTextWidth / 3, SCROLL_DISTANCE * 2);
+            mBitNumber.drawNumber(canvas, mTextWidth * 2 / 3, SCROLL_DISTANCE * 3);
         }
-        canvas.restoreToCount(sc);
+
+        canvas.restore();
 
         //绘制顶部遮罩层
         mMuskPaint.setShader(mTopShader);
@@ -283,6 +301,14 @@ public class ScoreView1 extends View {
                 currentNum = targetNum = score;
                 currentY = mInitY;
             }
+        }
+
+        /**
+         * 复位
+         */
+        void reset(){
+            currentNum = 0;
+            targetNum = 0;
         }
 
         void drawNumber(Canvas canvas, int positionX, int deltaY) {
@@ -355,13 +381,12 @@ public class ScoreView1 extends View {
 
 
     private class SpecialNumber {
-        private final int STATUS_NONE = 0;
-        private final int STATUS_START_ANIM = 0;//开始动画
-        private final int STATUS_FINISH_ANIM = 0;//结束动画
+        private final int STATUS_NONE = 0;//刚显示时初始状态
+        private final int STATUS_DISAPPEAR_ANIM = 1;//数字开始消失时状态
+        private final int STATUS_DISPALY_ANIM = 2;//数字开始出现时状态
+        private final int STATUS_SCROLL = 3;//数字滚动中间状态
         private int status = STATUS_NONE;
         private int initTranslationX;//初始化时为了数字居中需要做向左平移
-        private int currentNum = 1;//当前数字
-        private int targetNum;//目标数字
         private int currentY;
         private int mPaddingLeft;//因为1比较窄，与十位数字0之间的间距太大，所以对1的绘制靠右一些(而不是从x=0开始)
         private int translationX;//数字左右平移距离
@@ -383,44 +408,33 @@ public class ScoreView1 extends View {
         }
 
         void start() {
-            status = STATUS_START_ANIM;
+            status = STATUS_DISAPPEAR_ANIM;
             isScrollAnim = true;
             translationAnim = true;
-            targetNum = 0;
             translationEnd = -mTextWidth / 6;
             translationStep = -SCROLL_DISTANCE;
         }
 
-        void setScore(int score) {
+        void setScore(int score, boolean hasFinishAnim) {
             if (score == 1) {
+                status = STATUS_DISPALY_ANIM;
                 translationAnim = true;
-                currentNum = 1;
-                targetNum = 1;
                 translationEnd = initTranslationX;
                 translationStep = SCROLL_DISTANCE;
-
-//                if (hasAnim) {
-//                    targetNum = score;
-//                } else {
-//                    currentNum = targetNum = score;
-//                    currentY = mInitY;
-//                }
             }
         }
 
         /**
-         * 在如下两种情况被调用
-         * 1.初始化时，绘制1；
-         * 2.数值开始滚动时，此时currentNum被设置为0了，这就是为什么里面会判断currentNum == 1
-         *
-         * @param canvas
+         * 复位
          */
+        void reset(){
+            status = STATUS_NONE;
+            translationX = initTranslationX;
+        }
+
         void drawNumber(Canvas canvas) {
-            //注意这里需要判断currentNum == 1时，才进行绘制
-            if (currentNum == 1) {
-                currentY = mInitY;
-                canvas.drawText(String.valueOf(currentNum), mPaddingLeft, currentY, mTextPaint);
-            }
+            currentY = mInitY;
+            canvas.drawText("1", mPaddingLeft, currentY, mTextPaint);
         }
 
         /**
@@ -429,9 +443,10 @@ public class ScoreView1 extends View {
          * @param canvas
          * @param deltaY
          */
-        void drawNumberStartAnim(Canvas canvas, int deltaY) {
+        void drawNumberDisappearAnim(Canvas canvas, int deltaY) {
             //百位数字上下滚动动画
             if (isScrollAnim) {
+                int currentNum = 1;
                 //数字向上或向下滚动一个字符，那么动画就应该结束了
                 if (scrollDirection == SCROLL_DOWN) {
                     currentY += deltaY;
@@ -449,10 +464,14 @@ public class ScoreView1 extends View {
                     }
                 }
 
-                if ((Math.abs(currentY - mInitY) <= deltaY) && (currentNum == targetNum)) {
+                if ((Math.abs(currentY - mInitY) <= deltaY) && (currentNum == 0)) {
                     //百位数字上下滚动动画结束
                     currentY = mInitY;
                     isScrollAnim = false;
+                    //检测动画是否结束了，如果结束了则改变status
+                    if(!translationAnim){
+                        status = STATUS_SCROLL;
+                    }
                 } else {
                     canvas.drawText(String.valueOf(currentNum), mPaddingLeft, currentY, mTextPaint);
                 }
@@ -465,23 +484,29 @@ public class ScoreView1 extends View {
                     //十位个位平移动画结束
                     translationX = translationEnd;
                     translationAnim = false;
+                    //检测动画是否结束了，如果结束了则改变status
+                    if(!isScrollAnim){
+                        status = STATUS_SCROLL;
+                    }
                 }
             }
         }
 
         /**
-         * 结束动画
+         * 显示动画
          *
          * @param canvas
          * @param deltaY
          */
-        void drawNumberFinishAnim(Canvas canvas, int deltaY) {
+        void drawNumberDisplayAnim(Canvas canvas, int deltaY) {
             if (translationAnim) {
                 translationX += translationStep;
                 if (Math.abs(translationX - translationEnd) < Math.abs(translationStep)) {
                     //十位个位平移动画结束
                     translationX = translationEnd;
                     translationAnim = false;
+                    status = STATUS_NONE;
+                    //注意最后这个postInvalidate，如果没有会出错
                     postInvalidate();
                 }
             }
